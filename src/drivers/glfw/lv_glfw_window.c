@@ -9,8 +9,8 @@
 #include "lv_glfw_window_private.h"
 #if LV_USE_OPENGLES
 #include <stdlib.h>
-#include <stdio.h>
 #include "../../core/lv_refr.h"
+#include "../../stdlib/lv_snprintf.h"
 #include "../../stdlib/lv_string.h"
 #include "../../core/lv_global.h"
 #include "../../display/lv_display_private.h"
@@ -68,19 +68,19 @@ static lv_ll_t glfw_window_ll;
  *   GLOBAL FUNCTIONS
  **********************/
 
-// Note: to enable taskbar window icon on Linux Wayland desktops, the window_title must match the
-// name of the applications/my_app.desktop file, minus the .desktop extension, at the time the
-// window is created (then it can be changed to whatever).  so 'my_app', in this example.
+/* Note: to enable taskbar window icon on Linux Wayland desktops, the window_title must match the
+   name of the applications/my_app.desktop file, minus the .desktop extension, at the time the
+   window is created (then it can be changed to whatever).  so 'my_app', in this example. */
 lv_glfw_window_t * lv_glfw_window_create_ex(int32_t hor_res, int32_t ver_res, bool use_mouse_indev, bool h_flip,
                                             bool v_flip,  const char * window_title, const char * desktop_file_name)
 {
-    const char * _defaultTitle = "";
-    const char * _defaultSuffix = "[ LVGL Simulator ]";
-    const char * _default_desktop_file = "lvgl_simulator";
-    char * _title = (char *)_default_desktop_file;
+    const char * default_title = "";
+    const char * default_suffix = "[ LVGL Simulator ]";
+    const char * default_desktop_file = "lvgl_simulator";
+    char * title = (char *)default_desktop_file;
 
     if(desktop_file_name != NULL) {
-        _title = (char *)desktop_file_name;
+        title = (char *)desktop_file_name;
     }
 
     if(lv_glfw_init() != 0) {
@@ -94,7 +94,7 @@ lv_glfw_window_t * lv_glfw_window_create_ex(int32_t hor_res, int32_t ver_res, bo
 
     /* Create window with graphics context */
     lv_glfw_window_t * existing_window = lv_ll_get_head(&glfw_window_ll);
-    window->window = glfwCreateWindow(hor_res, ver_res, _title, NULL,
+    window->window = glfwCreateWindow(hor_res, ver_res, title, NULL,
                                       existing_window ? existing_window->window : NULL);
     if(window->window == NULL) {
         LV_LOG_ERROR("glfwCreateWindow fail.");
@@ -103,14 +103,15 @@ lv_glfw_window_t * lv_glfw_window_create_ex(int32_t hor_res, int32_t ver_res, bo
         return NULL;
     }
 
-    _title = (window_title != NULL) ? (char *)window_title : (char *)_defaultTitle;
+    title = (window_title != NULL) ? (char *)window_title : (char *)default_title;
     if(desktop_file_name == NULL) {
         char buffer[256];
-        sprintf(buffer, "%s %s", _title, _defaultSuffix);
+        lv_snprintf(buffer, 255, "%s %s", title, default_suffix);
+        buffer[255] = '\0';
         glfwSetWindowTitle(window->window, buffer);
     }
     else {
-        glfwSetWindowTitle(window->window, _title);
+        glfwSetWindowTitle(window->window, title);
     }
 
     window->h_flip = h_flip;
@@ -349,11 +350,11 @@ static void window_update_handler(lv_timer_t * t)
 
             lv_area_t clip_area = texture->area;
 #if LV_USE_DRAW_OPENGLES
-            lv_opengles_render_texture(texture->texture_id, &texture->area, texture->opa, window->hor_res, window->ver_res,
-                                       &clip_area, window->h_flip, texture_disp == NULL ? !window->v_flip : window->v_flip);
+            lv_opengles_render_texture_dualflip(texture->texture_id, &texture->area, texture->opa, window->hor_res, window->ver_res,
+                                                &clip_area, window->h_flip, texture_disp == NULL ? !window->v_flip : window->v_flip);
 #else
-            lv_opengles_render_texture(texture->texture_id, &texture->area, texture->opa, window->hor_res, window->ver_res,
-                                       &clip_area, window->h_flip, window->v_flip);
+            lv_opengles_render_texture_dualflip(texture->texture_id, &texture->area, texture->opa, window->hor_res, window->ver_res,
+                                                &clip_area, window->h_flip, window->v_flip);
 #endif
         }
 
