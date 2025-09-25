@@ -17,18 +17,6 @@
  *      DEFINES
  *********************/
 
-#if LV_USE_WAYLAND && LV_USE_EGL
-    #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM EGL_PLATFORM_WAYLAND_KHR
-#elif LV_USE_LINUX_DRM && LV_LINUX_DRM_USE_EGL
-    #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM EGL_PLATFORM_GBM_KHR
-    /* For future use:
-    * #elif LV_USE_LINUX_GBM && LV_USE_EGL
-    *      lv_egl_adapter_outmod_gbm_create
-    */
-#else
-    #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM 0
-#endif
-
 #if LV_USE_OPENGLES
     #define DEFINED_EGL_OPENGL_BIT EGL_OPENGL_ES2_BIT
 #else /* Use desktop OpenGL */

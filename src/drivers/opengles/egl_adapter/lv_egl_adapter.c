@@ -38,12 +38,12 @@
 *********************/
 
 #if LV_USE_WAYLAND && LV_USE_EGL
-    #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM EGL_PLATFORM_WAYLAND_KHR
+    #define NATIVE_EGL_PLATFORM_ENUM EGL_PLATFORM_WAYLAND_KHR
 #elif LV_USE_LINUX_DRM && LV_LINUX_DRM_USE_EGL
-    #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM EGL_PLATFORM_GBM_KHR
+    #define NATIVE_EGL_PLATFORM_ENUM EGL_PLATFORM_GBM_KHR
 #else
     /* no valid output method defined, throw configuration error */
-    #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM 0
+    #define NATIVE_EGL_PLATFORM_ENUM 0
 #endif
 
 #if LV_USE_OPENGLES
@@ -372,7 +372,7 @@ bool egl_display_is_valid(void * adapter_ptr)
     char const * __restrict const supported_extensions = egl_query_string(EGL_NO_DISPLAY, EGL_EXTENSIONS);
 
     bool extensions_supported = false;
-    if(GLMARK2_NATIVE_EGL_DISPLAY_ENUM != 0 && supported_extensions &&
+    if(NATIVE_EGL_PLATFORM_ENUM != 0 && supported_extensions &&
        strstr(supported_extensions, "EGL_EXT_platform_base")) {
         extensions_supported = true;
         PFNEGLGETPLATFORMDISPLAYEXTPROC egl_get_platform_display =
@@ -380,7 +380,7 @@ bool egl_display_is_valid(void * adapter_ptr)
             egl_get_proc_address("eglGetPlatformDisplayEXT");
 
         if(egl_get_platform_display != NULL) adapter_ref->egl_display = egl_get_platform_display(
-                                                                                GLMARK2_NATIVE_EGL_DISPLAY_ENUM,
+                                                                                NATIVE_EGL_PLATFORM_ENUM,
                                                                                 (void *)adapter_ref->egl_native_display, NULL);
 
         if(!adapter_ref->egl_display) {

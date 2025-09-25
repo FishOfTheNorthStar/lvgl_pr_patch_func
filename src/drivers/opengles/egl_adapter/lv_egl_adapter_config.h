@@ -3,8 +3,8 @@
  *
  */
 
-#ifndef GLMARK2_GL_VISUAL_CONFIG_H_
-#define GLMARK2_GL_VISUAL_CONFIG_H_
+#ifndef LV_EGL_ADAPTER_CONFIG_H_
+#define LV_EGL_ADAPTER_CONFIG_H_
 
 /*********************
  *      DEFINES
@@ -86,4 +86,4 @@ bool lv_egl_adapter_config_get_vsync(void * viscon_ptr);
  *      MACROS
  **********************/
 
-#endif
+#endif /* LV_EGL_ADAPTER_CONFIG_H_ */
