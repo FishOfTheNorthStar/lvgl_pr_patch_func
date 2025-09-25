@@ -3,7 +3,7 @@
  */
 
 #include "../../../../../../lv_conf_internal.h"
-#if LV_EGL_ADAPTED_WITH_GL
+#if LV_USE_EGL && !LV_USE_OPENGLES
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1511,4 +1511,4 @@ int gladLoadGL(GLADloadfunc load)
 #ifdef __cplusplus
 }
 #endif
-#endif /* LV_EGL_ADAPTED_WITH_GL */
+#endif /* LV_USE_EGL && !LV_USE_OPENGLES */

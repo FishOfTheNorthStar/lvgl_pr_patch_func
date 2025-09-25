@@ -17,21 +17,22 @@
  *      DEFINES
  *********************/
 
-#if  LV_ADAPTED_ON_WAYLAND
+#if LV_USE_WAYLAND && LV_USE_EGL
     #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM EGL_PLATFORM_WAYLAND_KHR
-#elif  LV_ADAPTED_ON_DRM
+#elif LV_USE_LINUX_DRM && LV_LINUX_DRM_USE_EGL
     #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM EGL_PLATFORM_GBM_KHR
+    /* For future use:
+    * #elif LV_USE_LINUX_GBM && LV_USE_EGL
+    *      lv_egl_adapter_outmod_gbm_create
+    */
 #else
-    // Platforms not in the above platform enums (GBM) fall back to eglGetDisplay.
     #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM 0
 #endif
 
-#if LV_EGL_ADAPTED_WITH_GLESV2
+#if LV_USE_OPENGLES
     #define DEFINED_EGL_OPENGL_BIT EGL_OPENGL_ES2_BIT
-#elif LV_EGL_ADAPTED_WITH_GL
+#else /* Use desktop OpenGL */
     #define DEFINED_EGL_OPENGL_BIT EGL_OPENGL_BIT
-#else
-    #define DEFINED_EGL_OPENGL_BIT 0
 #endif
 
 const int eglAttributes[] = {

@@ -42,6 +42,11 @@
  *      DEFINES
  *********************/
 
+/* If your build environment does not support gbm_surface_create_with_modifiers2,
+ * set this to zero to fallback on gbm_surface_create_with_modifiers2.
+ */
+#define LV_EGL_USE_GBM_CREATE_WITH_MODIFIERS2 1
+
 /* width of interior content area (adjust if you want wider box) */
 #define BOX_WIDTH 23
 #define MAX_LINE_LEN 256
@@ -454,7 +459,7 @@ bool lv_egl_adapter_outmod_drm_create_window(void * nativedrm_ptr, native_window
                                                   format, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
     }
     else {
-#if HAVE_GBM_SURFACE_CREATE_WITH_MODIFIERS2
+#if LV_EGL_USE_GBM_CREATE_WITH_MODIFIERS2
         drm_out->gbm_surface = gbm_surface_create_with_modifiers2(
                                    drm_out->gbm_dev, drm_out->drm_mode->hdisplay, drm_out->drm_mode->vdisplay,
                                    format, (const uint64_t *)lv_array_at(validated_mods, 0), lv_array_size(validated_mods),

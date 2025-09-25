@@ -46,11 +46,12 @@ static void release_disp_cb(lv_event_t * e);
  **********************/
 
 
-void lv_opengles_texture_reshape(lv_display_t * disp, int32_t width, int32_t height) {
+void lv_opengles_texture_reshape(lv_display_t * disp, int32_t width, int32_t height)
+{
 
     lv_opengles_texture_t * dsc = lv_display_get_driver_data(disp);
 
-    if (dsc->texture_id != 0) {
+    if(dsc->texture_id != 0) {
         GL_CALL(glDeleteTextures(1, &dsc->texture_id));
     }
 
@@ -88,7 +89,7 @@ void lv_opengles_texture_reshape(lv_display_t * disp, int32_t width, int32_t hei
 
 static lv_display_t * opengles_texture_create_internal(lv_display_t * disp, int32_t w, int32_t h)
 {
-    
+
     if(disp == NULL) {
         return NULL;
     }
@@ -124,8 +125,8 @@ static lv_display_t * opengles_texture_create_internal(lv_display_t * disp, int3
     lv_display_add_event_cb(disp, release_disp_cb, LV_EVENT_DELETE, disp);
 
     dsc->texture_id = 0;
-    lv_opengles_texture_reshape(disp, disp->hor_res, disp->ver_res );
-    
+    lv_opengles_texture_reshape(disp, disp->hor_res, disp->ver_res);
+
 #if LV_USE_DRAW_OPENGLES
     /* MK - Commented out momentarily */
     //lv_display_delete_refr_timer(disp);

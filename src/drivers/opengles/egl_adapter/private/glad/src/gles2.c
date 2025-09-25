@@ -2,7 +2,8 @@
  * SPDX-License-Identifier: (WTFPL OR CC0-1.0) AND Apache-2.0
  */
 #include "../../../../../../lv_conf_internal.h"
-#if LV_EGL_ADAPTED_WITH_GLESV2
+#if LV_USE_EGL && LV_USE_OPENGLES
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -624,4 +625,4 @@ int gladLoadGLES2(GLADloadfunc load)
 }
 #endif
 
-#endif /* LV_EGL_ADAPTED_WITH_GLESV2 */
+#endif /* LV_USE_EGL && LV_USE_OPENGLES */

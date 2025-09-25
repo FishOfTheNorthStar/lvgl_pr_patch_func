@@ -54,7 +54,7 @@ lv_drm_egl_t * lv_drm_egl_create();
 
 /**
  * Create an lv_drm_egl output with no textures and initialize OpenGL
- * @param placeholder_display 
+ * @param placeholder_display
  * @param use_mouse_indev    send pointer indev input to LVGL display textures
  * @param h_flip             Should the window contents be horizontally mirrored?
  * @param v_flip             Should the window contents be vertically mirrored?
@@ -62,7 +62,7 @@ lv_drm_egl_t * lv_drm_egl_create();
  */
 lv_drm_egl_t * lv_drm_egl_create_ex(lv_display_t * placeholder_display, bool use_mouse_indev, bool h_flip, bool v_flip);
 
-lv_display_t * lv_drm_egl_get_display(lv_drm_egl_t * window, lv_display_t * placeholder_display );
+lv_display_t * lv_drm_egl_get_display(lv_drm_egl_t * window, lv_display_t * placeholder_display);
 
 /**
  * Delete an lv_drm_egl output. If it is the last one, the process will exit

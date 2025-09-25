@@ -10,6 +10,7 @@
 #include "../../../lv_conf_internal.h"
 #include "../../../misc/lv_array.h"
 #include "../../../misc/lv_log.h"
+#include "../../../misc/lv_assert.h"
 
 #include "lv_egl_adapter_interface.h"
 #include <stdlib.h>
@@ -67,10 +68,13 @@ static bool FALSE_ERROR(const char * desc);
 bool lv_egl_adapter_interface_init(void * cnvs_ptr)
 {
     lv_egl_adapter_interface_t * interface = CAST(cnvs_ptr);
-#if LV_ADAPTED_ON_WAYLAND
+#if LV_USE_WAYLAND && LV_USE_EGL
     lv_egl_adapter_output_core_t * core = lv_egl_adapter_outmod_wayland_get_core(interface->output_module);
-#else
+#elif LV_USE_LINUX_DRM && LV_LINUX_DRM_USE_EGL
     lv_egl_adapter_output_core_t * core = lv_egl_adapter_outmod_drm_get_core(interface->output_module);
+#else
+    LV_LOG_ERROR("EGL init error, no output core defined.\n");
+    LV_ASSERT(NULL);
 #endif
     lv_egl_adapter_set_output_core(interface->egl_adapter, core);
     if(!core->init_display(interface->output_module, &(interface->width), &(interface->height),
@@ -110,16 +114,22 @@ void lv_egl_adapter_interface_visible(void * cnvs_ptr, bool visible)
     lv_egl_adapter_interface_t * interface = CAST(cnvs_ptr);
     if(visible && !interface->offscreen_fbo_count) CORE(interface)->visible(interface->output_module, visible);
 }
+
+static void throw_config_error(void)
+{
+    LV_ASSERT_NULL(NULL);
+}
+
 void lv_egl_adapter_interface_clear()
 {
     glClearColor(0.19f, 0.195f, 0.2f, 1.0f);
     glDepthRangef(-1.0, 1.0);
     glDepthFunc(GL_ALWAYS);
 
-#if LV_EGL_ADAPTED_WITH_GL
-    glClearDepth(1.0f);
-#elif LV_EGL_ADAPTED_WITH_GLESV2
+#if LV_USE_OPENGLES
     glClearDepthf(1.0f);
+#else /* Use desktop OpenGL */
+    glClearDepth(1.0f);
 #endif
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -156,12 +166,17 @@ lv_egl_adapter_interface_t * interface_create_internal(lv_egl_adapter_t * egl_ad
 
     /* NOTE: do not try the GBM option yet, the GBM class has not been converted */
     interface->output_module =
-#if LV_ADAPTED_ON_GBM
-            NativeStateGBM _egl_output
-#elif LV_ADAPTED_ON_WAYLAND
+#if LV_USE_WAYLAND && LV_USE_EGL
             lv_egl_adapter_outmod_wayland_create
-#else // LV_ADAPTED_ON_DRM
+#elif LV_USE_LINUX_DRM && LV_LINUX_DRM_USE_EGL
             lv_egl_adapter_outmod_drm_create
+    /* For future use:
+     * #elif LV_USE_LINUX_GBM && LV_USE_EGL
+     *      lv_egl_adapter_outmod_gbm_create
+     */
+#else
+    /* no valid output method defined, throw configuration error */
+            throw_config_error
 #endif
             ();
     interface->width = width;
@@ -467,7 +482,8 @@ static bool interface_confirm_pixel_format(void * cnvs_ptr)
     bool supports_rgb8 = (false);
     bool supports_depth24 = (false);
     bool supports_depth32 = (false);
-#if LV_EGL_ADAPTED_WITH_GLESV2
+
+#if LV_USE_OPENGLES
     if(determine_gl_extension_support("GL_ARM_rgba8")) supports_rgba8 = true;
     if(determine_gl_extension_support("GL_OES_depth24")) supports_depth24 = true;
     if(determine_gl_extension_support("GL_OES_depth32")) supports_depth32 = true;
@@ -475,7 +491,7 @@ static bool interface_confirm_pixel_format(void * cnvs_ptr)
         supports_rgba8 = true;
         supports_rgb8 = true;
     }
-#elif LV_EGL_ADAPTED_WITH_GL
+#else
     supports_rgba8 = true;
     supports_rgb8 = true;
     supports_depth24 = true;

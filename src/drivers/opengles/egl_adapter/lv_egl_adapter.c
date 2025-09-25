@@ -37,24 +37,22 @@
 *      DEFINES
 *********************/
 
-#if  LV_ADAPTED_ON_WAYLAND
+#if LV_USE_WAYLAND && LV_USE_EGL
     #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM EGL_PLATFORM_WAYLAND_KHR
-#elif  LV_ADAPTED_ON_DRM
+#elif LV_USE_LINUX_DRM && LV_LINUX_DRM_USE_EGL
     #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM EGL_PLATFORM_GBM_KHR
 #else
-    // Platforms not in the above platform enums (GBM) fall back to eglGetDisplay.
+    /* no valid output method defined, throw configuration error */
     #define GLMARK2_NATIVE_EGL_DISPLAY_ENUM 0
-#endif /* LV_ADAPTED_ON_WAYLAND */
+#endif
 
-#if LV_EGL_ADAPTED_WITH_GLESV2
+#if LV_USE_OPENGLES
     #define DEFINED_EGL_OPENGL_BIT EGL_OPENGL_ES2_BIT
     GLAD_API_CALL int gladLoadGLES2UserPtr(GLADuserptrloadfunc load, void * userptr);
     GLAD_API_CALL int gladLoadGLES2(GLADloadfunc load);
-#elif LV_EGL_ADAPTED_WITH_GL
+#else /* Use desktop OpenGL */
     #define DEFINED_EGL_OPENGL_BIT EGL_OPENGL_BIT
-#else
-    #define DEFINED_EGL_OPENGL_BIT 0
-#endif /* LV_EGL_ADAPTED_WITH_GLESV2 */
+#endif /* LV_USE_OPENGLES */
 
 /**********************
  *      TYPEDEFS
@@ -109,7 +107,7 @@ bool lv_egl_adapter_init_surface(void * adapter_ptr, void * native_window)
 bool lv_egl_adapter_init_extensions(void * adapter_ptr)
 {
     lv_egl_adapter_t * adapter_ref = (lv_egl_adapter_t *)(adapter_ptr);
-#if LV_EGL_ADAPTED_WITH_GLESV2
+#if LV_USE_OPENGLES
     int version_result = gladLoadGLES2UserPtr(load_proc, adapter_ref->gl_extern_handle);
     if(!version_result) {
         LV_LOG_ERROR("Loading GLESv2 entry points failed.");
@@ -118,7 +116,7 @@ bool lv_egl_adapter_init_extensions(void * adapter_ptr)
     else {
         LV_LOG_INFO("GLES2 loaded with version result: %d.", version_result);
     }
-#elif LV_EGL_ADAPTED_WITH_GL
+#else /* Use desktop OpenGL */
     if(!gladLoadGLUserPtr(load_proc, adapter_ref->gl_extern_handle)) {
         LV_LOG_ERROR("Loading GL entry points failed.");
         return false;
@@ -417,17 +415,16 @@ bool egl_display_is_valid(void * adapter_ptr)
         LV_LOG_ERROR("Loading EGL entry points failed");
         return false;
     }
-
-#if LV_EGL_ADAPTED_WITH_GL
+#if LV_USE_OPENGLES
+    EGLenum apiType = EGL_OPENGL_ES_API;
+    const char * libNames[] = { "libGLESv2.so", "libGLESv2.so.2" };
+#else /* Use desktop OpenGL */
     EGLenum apiType = EGL_OPENGL_API;
     const char * libNames[] = { "libGL.so", "libGL.so.1" };
     if(!GLAD_EGL_VERSION_1_4) {
         LV_LOG_ERROR("EGL version %d.%d does not support the OpenGL API", egl_major, egl_minor);
         return false;
     }
-#else // LV_EGL_ADAPTED_WITH_GLESV2
-    EGLenum apiType = EGL_OPENGL_ES_API;
-    const char * libNames[] = { "libGLESv2.so", "libGLESv2.so.2" };
 #endif
 
     if(eglBindAPI && !eglBindAPI(apiType)) {
@@ -567,9 +564,8 @@ bool egl_context_is_valid(void * adapter_ptr)
 
     if(!egl_config_is_valid(adapter_ref))
         return false;
-
     static const EGLint context_attribs[] = {
-#ifdef LV_EGL_ADAPTED_WITH_GLESV2
+#ifdef LV_USE_OPENGLES
         EGL_CONTEXT_CLIENT_VERSION, 2,
 #endif
         EGL_NONE
