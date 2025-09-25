@@ -8,11 +8,11 @@
  *********************/
 
 #include "lv_opengles_egl.h"
-#if LV_USE_EGL 
+#if LV_USE_EGL
 
 /*
- * this module has been replaced by the functionality of lv_linux_drm_egl.c 
- * (in drivers/display/drm), and can probably be safely removed. 
+ * this module has been replaced by the functionality of lv_linux_drm_egl.c
+ * (in drivers/display/drm), and can probably be safely removed.
  */
 
 #include "lv_opengles_window.h"
