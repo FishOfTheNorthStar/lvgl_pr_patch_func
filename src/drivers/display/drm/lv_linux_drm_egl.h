@@ -3,8 +3,8 @@
  *
  */
 
-#ifndef LV_MK_DRM_WINDOW_H
-#define LV_MK_DRM_WINDOW_H
+#ifndef LV_LINUX_DRM_EGL_H
+#define LV_LINUX_DRM_EGL_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -107,4 +107,4 @@ void lv_drm_use_egl_texture_remove(lv_drm_use_egl_texture_t * texture);
 } /* extern "C" */
 #endif
 
-#endif /* LV_MK_DRM_WINDOW_H */
+#endif /* LV_LINUX_DRM_EGL_H */

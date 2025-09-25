@@ -1,10 +1,10 @@
 /**
- * @file lv_drm_egl_private.h
+ * @file lv_linux_drm_egl.h
  *
  */
 
-#ifndef LV_MK_DRM_WINDOW_PRIVATE_H
-#define LV_MK_DRM_WINDOW_PRIVATE_H
+#ifndef LV_LINUX_DRM_EGL_PRIVATE_H
+#define LV_LINUX_DRM_EGL_PRIVATE_H
 
 
 #ifdef __cplusplus
@@ -69,4 +69,4 @@ struct _lv_drm_use_egl_texture_t {
 #endif
 
 
-#endif /*LV_MK_DRM_WINDOW_PRIVATE_H*/
+#endif /*LV_LINUX_DRM_EGL_PRIVATE_H*/

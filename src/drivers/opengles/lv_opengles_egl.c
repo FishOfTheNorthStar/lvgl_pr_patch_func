@@ -8,7 +8,7 @@
  *********************/
 
 #include "lv_opengles_egl.h"
-#if LV_USE_EGL
+#if LV_USE_EGL && 0 /* testing completely disabling this */
 
 #include "lv_opengles_window.h"
 #include "lv_opengles_driver.h"
