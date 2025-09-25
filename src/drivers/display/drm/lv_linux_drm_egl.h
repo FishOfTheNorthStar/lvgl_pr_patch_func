@@ -97,6 +97,8 @@ lv_drm_use_egl_texture_t * lv_drm_egl_add_texture(lv_drm_egl_t * window,
  */
 void lv_drm_use_egl_texture_remove(lv_drm_use_egl_texture_t * texture);
 
+void lv_linux_drm_egl_set_flip(lv_display_t * disp, bool h_flip, bool v_flip);
+
 /**********************
  *      MACROS
  **********************/

@@ -194,9 +194,6 @@ void lv_opengles_render_display_texture(unsigned int texture, const lv_area_t * 
     float tempsin = sin(angle);
     float tempcos = cos(angle);
 
-    //hor_scale *= 1.15f;
-    //ver_scale *= 1.15f;
-
     //LV_LOG("ANGLE: %.2f  sin: %.3f  cos: %.3f  hor_scale: %.3f  ver_scale: %.3f  hor_trans: %.3f  ver_trans: %.3f\n", angle * (180.f / 3.14159f),  tempsin, tempcos, hor_scale, ver_scale, hor_translate, ver_translate);
     float matrix[9] = {
             tempcos * hor_scale, -tempsin * hor_scale, hor_translate,
@@ -220,7 +217,14 @@ void lv_opengles_render_display_texture(unsigned int texture, const lv_area_t * 
         float clip_y1 = 0.f;//clip_y1 > 1.0f ? 1.0f : clip_y1;
         float clip_x2 = 1.f;//clip_x2 > 1.0f ? 1.0f : clip_x2;
         float clip_y2 = 1.f;//clip_y2 > 1.0f ? 1.0f : clip_y2;
-
+        if(h_flip) {
+            clip_x1 = 1.0f;
+            clip_x2 = 0.0f;
+        }
+        if(v_flip) {
+            clip_y1 = 1.0f;
+            clip_y2 = 0.0f;
+        }
         lv_display_rotation_t rotation = lv_display_get_rotation(lv_display_get_default());
         switch(rotation) {
             case LV_DISPLAY_ROTATION_90:

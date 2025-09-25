@@ -410,4 +410,14 @@ void lv_linux_drm_set_file(lv_display_t * disp, const char * file, int64_t conne
     //LV_LOG_INFO(file);
 }
 
+void lv_linux_drm_egl_set_flip(lv_display_t * disp, bool h_flip, bool v_flip)
+{
+    if(disp) {
+        lv_egl_adapter_interface_t * interface = lv_display_get_driver_data(disp);
+        if(interface) {
+            interface->h_flip = h_flip;
+            interface->v_flip = v_flip;
+        }
+    }
+}
 #endif /*LV_USE_LINUX_DRM && LV_LINUX_DRM_USE_EGL*/

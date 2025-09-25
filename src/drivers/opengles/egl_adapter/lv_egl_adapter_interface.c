@@ -7,7 +7,6 @@
  *      INCLUDES
  *********************/
 
-#ifdef __LV_OUTMOD_CLASS_INCLUDE_T
 
 #include "../../../lv_conf_internal.h"
 #include "../../../misc/lv_array.h"
@@ -15,6 +14,7 @@
 #include "../../../misc/lv_assert.h"
 
 #include "lv_egl_adapter_interface.h"
+#ifdef __LV_OUTMOD_SETUP_COMPLETE
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -183,6 +183,8 @@ lv_egl_adapter_interface_t * interface_create_internal(lv_egl_adapter_t * egl_ad
             ();
     interface->width = width;
     interface->height = height;
+    interface->h_flip = false;
+    interface->v_flip = false;
     interface->refresh_rate = refresh_rate;
     interface->offscreen_fbo_count = 0;
     interface->egl_adapter = egl_adapter;
@@ -641,4 +643,4 @@ static void unproject_pixel_world(float mouse_x, float mouse_y, float w, float h
     out[2] = z / wv;
 }
 */
-#endif /* __LV_OUTMOD_CLASS_INCLUDE_T */
+#endif /* __LV_OUTMOD_SETUP_COMPLETE */
