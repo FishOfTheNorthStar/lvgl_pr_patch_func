@@ -271,6 +271,21 @@ void lv_drm_egl_set_flip(lv_drm_egl_t * window, bool h_flip, bool v_flip)
     window->v_flip = v_flip;
 }
 
+lv_drm_egl_t * lv_drm_egl_get_window_from_display(lv_display_t * disp) {
+    lv_egl_adapter_interface_t * interface = lv_display_get_driver_data(disp);
+    if (interface) {
+        lv_drm_egl_t * window;
+        LV_LL_READ(&lv_drm_egl_window_ll, window) {
+            if (window) {
+                if (window->egl_adapter_interface == interface){
+                    return window;
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
 lv_drm_use_egl_texture_t * lv_drm_egl_add_texture(lv_drm_egl_t * window,
                                                   unsigned int texture_id,
                                                   int32_t w,
@@ -410,14 +425,4 @@ void lv_linux_drm_set_file(lv_display_t * disp, const char * file, int64_t conne
     //LV_LOG_INFO(file);
 }
 
-void lv_linux_drm_egl_set_flip(lv_display_t * disp, bool h_flip, bool v_flip)
-{
-    if(disp) {
-        lv_egl_adapter_interface_t * interface = lv_display_get_driver_data(disp);
-        if(interface) {
-            interface->h_flip = h_flip;
-            interface->v_flip = v_flip;
-        }
-    }
-}
 #endif /*LV_USE_LINUX_DRM && LV_LINUX_DRM_USE_EGL*/

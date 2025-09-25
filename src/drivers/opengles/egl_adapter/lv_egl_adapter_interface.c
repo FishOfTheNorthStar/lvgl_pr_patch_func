@@ -183,8 +183,6 @@ lv_egl_adapter_interface_t * interface_create_internal(lv_egl_adapter_t * egl_ad
             ();
     interface->width = width;
     interface->height = height;
-    interface->h_flip = false;
-    interface->v_flip = false;
     interface->refresh_rate = refresh_rate;
     interface->offscreen_fbo_count = 0;
     interface->egl_adapter = egl_adapter;

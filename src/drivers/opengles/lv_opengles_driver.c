@@ -202,29 +202,10 @@ void lv_opengles_render_display_texture(unsigned int texture, const lv_area_t * 
         };*/
 
     if(texture != 0) {
-        /*
-        float clip_x1 = h_flip ? lv_opengles_map_float(texture_clip_area->x2, texture_area->x2, texture_area->x1, 0.f, 1.f)
-                        : lv_opengles_map_float(texture_clip_area->x1, texture_area->x1, texture_area->x2, 0.f, 1.f);
-        float clip_x2 = h_flip ? lv_opengles_map_float(texture_clip_area->x1, texture_area->x2, texture_area->x1, 0.f, 1.f)
-                        : lv_opengles_map_float(texture_clip_area->x2, texture_area->x1, texture_area->x2, 0.f, 1.f);
-        float clip_y1 = v_flip ? lv_opengles_map_float(texture_clip_area->y2, texture_area->y2, texture_area->y1, 0.f, 1.f)
-                        : lv_opengles_map_float(texture_clip_area->y1, texture_area->y1, texture_area->y2, 0.f, 1.f);
-        float clip_y2 = v_flip ? lv_opengles_map_float(texture_clip_area->y1, texture_area->y2, texture_area->y1, 0.f, 1.f)
-                        : lv_opengles_map_float(texture_clip_area->y2, texture_area->y1, texture_area->y2, 0.f, 1.f);
-        */
-        //LV_LOG("CLIP X1/Y1: (%f, %f) X2/Y2: (%f, %f)\n", clip_x1, clip_y1, clip_x2, clip_y2);
-        float clip_x1 = 0.f;//clip_x1 > 1.0f ? 1.0f : clip_x1;
-        float clip_y1 = 0.f;//clip_y1 > 1.0f ? 1.0f : clip_y1;
-        float clip_x2 = 1.f;//clip_x2 > 1.0f ? 1.0f : clip_x2;
-        float clip_y2 = 1.f;//clip_y2 > 1.0f ? 1.0f : clip_y2;
-        if(h_flip) {
-            clip_x1 = 1.0f;
-            clip_x2 = 0.0f;
-        }
-        if(v_flip) {
-            clip_y1 = 1.0f;
-            clip_y2 = 0.0f;
-        }
+        float clip_x1 = 0.f;
+        float clip_y1 = 0.f;
+        float clip_x2 = 1.f;
+        float clip_y2 = 1.f;
         lv_display_rotation_t rotation = lv_display_get_rotation(lv_display_get_default());
         switch(rotation) {
             case LV_DISPLAY_ROTATION_90:

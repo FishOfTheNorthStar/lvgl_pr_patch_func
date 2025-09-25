@@ -56,8 +56,6 @@ struct lv_egl_adapter_interface {
     __LV_OUTMOD_CLASS_T * output_module;
     int width;
     int height;
-    bool h_flip;
-    bool v_flip;
     float refresh_rate;
     unsigned int offscreen_fbo_count;
     int offscreen_fbo_index;
