@@ -8,7 +8,12 @@
  *********************/
 
 #include "lv_opengles_egl.h"
-#if LV_USE_EGL && 0 /* testing completely disabling this */
+#if LV_USE_EGL 
+
+/*
+ * this module has been replaced by the functionality of lv_linux_drm_egl.c 
+ * (in drivers/display/drm), and can probably be safely removed. 
+ */
 
 #include "lv_opengles_window.h"
 #include "lv_opengles_driver.h"
@@ -61,8 +66,8 @@ struct _lv_opengles_window_texture_t {
  *  STATIC PROTOTYPES
  **********************/
 
-static lv_result_t lv_egl_init(void);
-static void lv_egl_timer_init(void);
+static lv_result_t egl_init(void);
+static void egl_timer_init(void);
 static void window_update_handler(lv_timer_t * t);
 static void window_display_delete_cb(lv_event_t * e);
 static void window_display_flush_cb(lv_display_t * disp, const lv_area_t * area, uint8_t * px_map);
@@ -113,7 +118,7 @@ lv_opengles_window_t * lv_opengles_egl_window_create(int32_t hor_res, int32_t ve
                                                      lv_opengles_egl_window_cb_t post2)
 {
     backend_device = device;
-    if(lv_egl_init() == LV_RESULT_INVALID) {
+    if(egl_init() == LV_RESULT_INVALID) {
         return NULL;
     }
 
@@ -144,7 +149,7 @@ lv_opengles_window_t * lv_opengles_egl_window_create(int32_t hor_res, int32_t ve
     window->direct_render_invalidated = 1;
 #endif
 
-    lv_egl_timer_init();
+    egl_timer_init();
 
     EGLBoolean res = eglMakeCurrent(egl_display, window->surface, window->surface, egl_context);
     if(res == EGL_FALSE) {
@@ -340,7 +345,7 @@ lv_indev_t * lv_opengles_window_texture_get_mouse_indev(lv_opengles_window_textu
  *   STATIC FUNCTIONS
  **********************/
 
-static lv_result_t lv_egl_init(void)
+static lv_result_t egl_init(void)
 {
     if(egl_inited) {
         return LV_RESULT_OK;
@@ -389,7 +394,7 @@ static lv_result_t lv_egl_init(void)
     return LV_RESULT_OK;
 }
 
-static void lv_egl_timer_init(void)
+static void egl_timer_init(void)
 {
     if(update_handler_timer == NULL) {
         update_handler_timer = lv_timer_create(window_update_handler, LV_DEF_REFR_PERIOD, NULL);

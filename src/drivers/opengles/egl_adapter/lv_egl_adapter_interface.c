@@ -7,6 +7,8 @@
  *      INCLUDES
  *********************/
 
+#ifdef __LV_OUTMOD_CLASS_INCLUDE_T
+
 #include "../../../lv_conf_internal.h"
 #include "../../../misc/lv_array.h"
 #include "../../../misc/lv_log.h"
@@ -639,3 +641,4 @@ static void unproject_pixel_world(float mouse_x, float mouse_y, float w, float h
     out[2] = z / wv;
 }
 */
+#endif /* __LV_OUTMOD_CLASS_INCLUDE_T */
