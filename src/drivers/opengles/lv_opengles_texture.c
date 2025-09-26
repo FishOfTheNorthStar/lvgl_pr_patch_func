@@ -84,6 +84,27 @@ void lv_opengles_texture_reshape(lv_display_t * disp, int32_t width, int32_t hei
     GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
     GL_CALL(glBindTexture(GL_TEXTURE_2D, GL_NONE));
 
+#if LV_USE_DRAW_OPENGLES
+    static size_t LV_ATTRIBUTE_MEM_ALIGN dummy_buf;
+    lv_display_set_buffers(disp, &dummy_buf, NULL, width * height * 4, LV_DISPLAY_RENDER_MODE_DIRECT);
+    dsc->fb1 = NULL;
+#else
+    uint32_t stride = lv_draw_buf_width_to_stride(width, lv_display_get_color_format(disp));
+    uint32_t buf_size = stride * height;
+    if(dsc->fb1) {
+        dsc->fb1 = realloc(dsc->fb1, buf_size);
+    }
+    else {
+        dsc->fb1 = malloc(buf_size);
+    }
+    LV_ASSERT_MALLOC(dsc->fb1);
+    if(dsc->fb1 == NULL) {
+        lv_free(dsc);
+        lv_display_delete(disp);
+        return;
+    }
+    lv_display_set_buffers(disp, dsc->fb1, NULL, buf_size, LV_DISPLAY_RENDER_MODE_DIRECT);
+#endif
 }
 
 
@@ -102,35 +123,12 @@ static lv_display_t * opengles_texture_create_internal(lv_display_t * disp, int3
         lv_display_delete(disp);
         return NULL;
     }
-
-#if LV_USE_DRAW_OPENGLES
-    static size_t LV_ATTRIBUTE_MEM_ALIGN dummy_buf;
-    lv_display_set_buffers(disp, &dummy_buf, NULL, w * h * 4, LV_DISPLAY_RENDER_MODE_DIRECT);
     dsc->fb1 = NULL;
-#else
-    uint32_t stride = lv_draw_buf_width_to_stride(w, lv_display_get_color_format(disp));
-    uint32_t buf_size = stride * h;
-    dsc->fb1 = malloc(buf_size);
-    LV_ASSERT_MALLOC(dsc->fb1);
-    if(dsc->fb1 == NULL) {
-        lv_free(dsc);
-        lv_display_delete(disp);
-        return NULL;
-    }
-    lv_display_set_buffers(disp, dsc->fb1, NULL, buf_size, LV_DISPLAY_RENDER_MODE_DIRECT);
-#endif
-
-    lv_display_set_flush_cb(disp, flush_cb);
-    lv_display_set_driver_data(disp, dsc);
-    lv_display_add_event_cb(disp, release_disp_cb, LV_EVENT_DELETE, disp);
-
     dsc->texture_id = 0;
+    lv_display_set_driver_data(disp, dsc);
     lv_opengles_texture_reshape(disp, disp->hor_res, disp->ver_res);
-
-#if LV_USE_DRAW_OPENGLES
-    /* MK - Commented out momentarily */
-    //lv_display_delete_refr_timer(disp);
-#endif
+    lv_display_set_flush_cb(disp, flush_cb);
+    lv_display_add_event_cb(disp, release_disp_cb, LV_EVENT_DELETE, disp);
 
     return disp;
 }
@@ -181,27 +179,32 @@ static void flush_cb(lv_display_t * disp, const lv_area_t * area, uint8_t * px_m
 #if !LV_USE_DRAW_OPENGLES
     if(lv_display_flush_is_last(disp)) {
 
-        lv_opengles_texture_t * dsc = lv_display_get_driver_data(disp);
-        lv_color_format_t cf = lv_display_get_color_format(disp);
-        uint32_t stride = lv_draw_buf_width_to_stride(lv_display_get_horizontal_resolution(disp), cf);
+        int32_t w = lv_display_get_horizontal_resolution(disp);
+        int32_t h = lv_display_get_vertical_resolution(disp);
 
+        lv_opengles_texture_t * dsc = lv_display_get_driver_data(disp);
         GL_CALL(glBindTexture(GL_TEXTURE_2D, dsc->texture_id));
 
         GL_CALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
-        GL_CALL(glPixelStorei(GL_UNPACK_ROW_LENGTH, stride / lv_color_format_get_size(cf)));
+        GL_CALL(glPixelStorei(GL_UNPACK_ROW_LENGTH, w));
+
         /*Color depth: 8 (L8), 16 (RGB565), 24 (RGB888), 32 (XRGB8888)*/
 #if LV_COLOR_DEPTH == 8
-        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, disp->hor_res, disp->ver_res, 0, GL_RED, GL_UNSIGNED_BYTE, dsc->fb1));
+        uint32_t pixel_format = GL_RED;
+        uint32_t data_format = GL_UNSIGNED_BYTE;
 #elif LV_COLOR_DEPTH == 16
-        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB565, disp->hor_res, disp->ver_res, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5,
-                             dsc->fb1));
+        uint32_t pixel_format = GL_RGB;
+        uint32_t data_format = GL_UNSIGNED_SHORT_5_6_5;
 #elif LV_COLOR_DEPTH == 24
-        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, disp->hor_res, disp->ver_res, 0, GL_BGR, GL_UNSIGNED_BYTE, dsc->fb1));
+        uint32_t pixel_format = GL_BGR;
+        uint32_t data_format = GL_UNSIGNED_BYTE;
 #elif LV_COLOR_DEPTH == 32
-        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, disp->hor_res, disp->ver_res, 0, GL_BGRA, GL_UNSIGNED_BYTE, dsc->fb1));
+        uint32_t pixel_format = GL_BGRA;
+        uint32_t data_format = GL_UNSIGNED_BYTE;
 #else
 #error("Unsupported color format")
 #endif
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, pixel_format, data_format, dsc->fb1));
     }
 #endif /* !LV_USE_DRAW_OPENGLES */
 

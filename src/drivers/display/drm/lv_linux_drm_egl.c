@@ -87,94 +87,20 @@ static void display_resolution_change_event_cb(lv_event_t * e)
     lv_event_code_t code = lv_event_get_code(e);
     lv_drm_egl_t * window = lv_event_get_user_data(e);
     LV_ASSERT_NULL(window);
-    LV_LOG("RESOLUTION CHANGE EVENT RECIEVED\n");
-    //return;
 
     lv_display_rotation_t rotation = lv_display_get_rotation(disp);
     int32_t hor_res = lv_egl_adapter_interface_width(window->egl_adapter_interface);
     int32_t ver_res = lv_egl_adapter_interface_height(window->egl_adapter_interface);
 
-    //LV_LOG("Removing previous egl_texture..\n");
     lv_drm_use_egl_texture_remove(window->window_texture);
-
     lv_display_remove_event_cb_with_user_data(window->display_texture, display_resolution_change_event_cb, window);
-
-    //LV_LOG("Creating new window texture\n");
-    /* add the texture to the window */
     window->window_texture = lv_drm_egl_add_texture(window,
-                                                    lv_opengles_texture_get_texture_id(window->display_texture), ver_res, hor_res);
-
-    //lv_display_set_rotation(disp, LV_DISPLAY_ROTATION_0);
-    switch(rotation) {
-        case LV_DISPLAY_ROTATION_0:
-            break;
-        case LV_DISPLAY_ROTATION_90:
-            break;
-        case LV_DISPLAY_ROTATION_180:
-            break;
-        case LV_DISPLAY_ROTATION_270:
-            break;
-    }
-    lv_display_set_resolution(disp, hor_res, ver_res);
-    //lv_display_set_resolution(disp, ver_res, hor_res);
-    lv_opengles_texture_reshape(disp, hor_res, ver_res);
-    //lv_opengles_texture_reshape(disp, ver_res, hor_res);
-    //lv_display_set_rotation(disp, rotation);
-
-    //lv_display_set_resolution(disp, hor_res, ver_res);
-    //lv_display_set_rotation(disp, rotation);
+                                                    lv_opengles_texture_get_texture_id(window->display_texture), lv_display_get_horizontal_resolution(disp),
+                                                    lv_display_get_vertical_resolution(disp));
+    lv_opengles_texture_reshape(disp, lv_display_get_horizontal_resolution(disp),
+                                lv_display_get_vertical_resolution(disp));
     lv_display_add_event_cb(window->display_texture, display_resolution_change_event_cb, LV_EVENT_RESOLUTION_CHANGED,
                             window);
-
-
-#if 0
-    LV_LOG("Deleting previous display..\n");
-    //lv_display_remove_event_cb_with_user_data(window->display_texture, display_resolution_change_event_cb, window);
-    lv_display_delete(window->display_texture);
-
-    lv_display_t * new_display;
-    switch(rotation) {
-        case LV_DISPLAY_ROTATION_0:
-            LV_LOG("Creating display with default rotation and size: %dx%d\n", hor_res, ver_res);
-            new_display = lv_opengles_texture_create(hor_res, ver_res);
-            break;
-        case LV_DISPLAY_ROTATION_90:
-            LV_LOG("Creating display with 90 rotation and size: %dx%d\n", ver_res, hor_res);
-            new_display = lv_opengles_texture_create(ver_res, hor_res);
-            break;
-        case LV_DISPLAY_ROTATION_180:
-            LV_LOG("Creating display with 180 rotation and size: %dx%d\n", hor_res, ver_res);
-            new_display = lv_opengles_texture_create(hor_res, ver_res);
-            break;
-        case LV_DISPLAY_ROTATION_270:
-            LV_LOG("Creating display with 270 rotation and size: %dx%d\n", ver_res, hor_res);
-            new_display = lv_opengles_texture_create(ver_res, hor_res);
-            break;
-    }
-    LV_LOG("Removing previous egl_texture..\n");
-    lv_drm_use_egl_texture_remove(window->window_texture);
-    LV_LOG("Setting new display..\n");
-    window->display_texture = new_display;
-    lv_display_set_default(window->display_texture);
-    lv_display_set_rotation(window->display_texture, rotation);
-
-    //LV_LOG("Clearing linked-list of egl textures...\n");
-    //lv_ll_clear(&window->textures);
-
-    LV_LOG("Replacing display desc with egl_adapter_interface...\n");
-    lv_opengles_texture_t * display_desc = (lv_opengles_texture_t *)lv_display_get_driver_data(window->display_texture);
-    window->egl_adapter_interface->display_texture_desc.texture_id = display_desc->texture_id;
-    window->egl_adapter_interface->display_texture_desc.fb1 = display_desc->fb1;
-    lv_display_set_driver_data(window->display_texture, window->egl_adapter_interface);
-
-    LV_LOG("Creating new window texture\n");
-    /* add the texture to the window */
-    window->window_texture = lv_drm_egl_add_texture(window,
-                                                    lv_opengles_texture_get_texture_id(window->display_texture), hor_res, ver_res);
-
-    //  MK TEMP - and then re-register the display turn event
-#endif
-    LV_LOG("OUT\n");
 }
 
 lv_drm_egl_t * lv_drm_egl_create_ex(lv_display_t * placeholder_display, bool use_mouse_indev, bool h_flip, bool v_flip)
@@ -215,7 +141,6 @@ lv_drm_egl_t * lv_drm_egl_create_ex(lv_display_t * placeholder_display, bool use
     lv_display_rotation_t rotation = lv_display_get_rotation(placeholder_display);
     lv_opengles_texture_into_placeholder(placeholder_display, hor_res, ver_res);
     window->display_texture = placeholder_display;
-    //window->display_texture = lv_opengles_texture_create(ver_res, hor_res);  // rotated test, 90 degrees
     lv_display_set_default(window->display_texture);
 
     lv_opengles_texture_t * display_desc = (lv_opengles_texture_t *)lv_display_get_driver_data(window->display_texture);
@@ -271,13 +196,14 @@ void lv_drm_egl_set_flip(lv_drm_egl_t * window, bool h_flip, bool v_flip)
     window->v_flip = v_flip;
 }
 
-lv_drm_egl_t * lv_drm_egl_get_window_from_display(lv_display_t * disp) {
+lv_drm_egl_t * lv_drm_egl_get_window_from_display(lv_display_t * disp)
+{
     lv_egl_adapter_interface_t * interface = lv_display_get_driver_data(disp);
-    if (interface) {
+    if(interface) {
         lv_drm_egl_t * window;
         LV_LL_READ(&lv_drm_egl_window_ll, window) {
-            if (window) {
-                if (window->egl_adapter_interface == interface){
+            if(window) {
+                if(window->egl_adapter_interface == interface) {
                     return window;
                 }
             }
@@ -361,11 +287,8 @@ static void window_update_handler(lv_timer_t * t)
 
     /* render each window */
     LV_LL_READ(&lv_drm_egl_window_ll, window) {
-        //lv_opengles_viewport(0, 0, window->hor_res, window->ver_res);
-        //lv_opengles_viewport(0, 0, 480-1, 800-1);
-        //lv_opengles_viewport(0, 0, 800-1, 480-1);
-        lv_opengles_viewport(0, 0, lv_display_get_physical_horizontal_resolution(window->display_texture),
-                             lv_display_get_physical_vertical_resolution(window->display_texture));
+        lv_opengles_viewport(0, 0, lv_display_get_original_horizontal_resolution(window->display_texture),
+                             lv_display_get_original_vertical_resolution(window->display_texture));
         lv_egl_adapter_interface_clear();
 
         /* render each texture in the window */
