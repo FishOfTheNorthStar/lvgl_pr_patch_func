@@ -73,13 +73,27 @@ void lv_opengles_render_fill(lv_color_t color, const lv_area_t * area, lv_opa_t 
 void lv_opengles_render_clear(void);
 
 /**
- * Set the OpenGL viewport
+ * Set the OpenGL viewport and cache the dimensions as the new default viewport
  * @param x        x position of the viewport
  * @param y        y position of the viewport
  * @param w        width of the viewport
  * @param h        height of the viewport
  */
 void lv_opengles_viewport(int32_t x, int32_t y, int32_t w, int32_t h);
+
+/**
+ * Set the OpenGL viewport but do not cache the dimensions as the new viewport
+ * @param x        x position of the viewport
+ * @param y        y position of the viewport
+ * @param w        width of the viewport
+ * @param h        height of the viewport
+ */
+void lv_opengles_viewport_temp(int32_t x, int32_t y, int32_t w, int32_t h);
+
+/**
+ * Restore the last cached viewport dimensions
+ */
+void lv_opengles_viewport_restore(void);
 
 void lv_opengles_render_display_texture(unsigned int texture, const lv_area_t * texture_area, lv_opa_t opa,
                                         const lv_area_t * texture_clip_area, bool h_flip, bool v_flip);

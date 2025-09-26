@@ -287,10 +287,6 @@ static void window_update_handler(lv_timer_t * t)
 
     /* render each window */
     LV_LL_READ(&lv_drm_egl_window_ll, window) {
-        lv_opengles_viewport(0, 0, lv_display_get_original_horizontal_resolution(window->display_texture),
-                             lv_display_get_original_vertical_resolution(window->display_texture));
-        lv_egl_adapter_interface_clear();
-
         /* render each texture in the window */
         lv_drm_use_egl_texture_t * texture;
         LV_LL_READ(&window->textures, texture) {
@@ -301,17 +297,18 @@ static void window_update_handler(lv_timer_t * t)
                 lv_refr_now(texture_disp);
                 is_disp = true;
             }
-            //lv_area_set(&texture->area, 0, 0,480 - 1, 800 - 1);
-            //lv_area_set(&texture->area, 0, 0,800 - 1, 480 - 1);
             lv_area_t clip_area = texture->area;
             if(is_disp) {
+
+                lv_opengles_viewport(0, 0, lv_display_get_original_horizontal_resolution(window->display_texture),
+                                     lv_display_get_original_vertical_resolution(window->display_texture));
+                //lv_egl_adapter_interface_clear();  /* This does not appear to be necessary, and it adds overhead so I'm removing it for now - mk*/
+                bool v_flip = window->v_flip;
 #if LV_USE_DRAW_OPENGLES
-                lv_opengles_render_display_texture(texture->texture_id, &texture->area, texture->opa,
-                                                   &clip_area, window->h_flip, !window->v_flip);
-#else
-                lv_opengles_render_display_texture(texture->texture_id, &texture->area, texture->opa,
-                                                   &clip_area, window->h_flip, window->v_flip);
+                v_flip = !v_flip;
 #endif
+                lv_opengles_render_display_texture(texture->texture_id, &texture->area, texture->opa,
+                                                   &clip_area, window->h_flip, v_flip);
             }
             else {
                 /* It's never not the display texture so far in my tests - mk*/

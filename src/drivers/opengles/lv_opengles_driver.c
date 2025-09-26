@@ -170,20 +170,6 @@ void lv_opengles_render_display_texture(unsigned int texture, const lv_area_t * 
     GL_CALL(glActiveTexture(GL_TEXTURE0));
     GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
 
-    float hor_scale = 1.0f;
-    float ver_scale = 1.0f;
-    float hor_translate = 0.0f;
-    float ver_translate = 0.0f;
-    hor_scale = h_flip ? -hor_scale : hor_scale;
-    ver_scale = v_flip ? ver_scale : -ver_scale;
-    /*
-     *   Normal
-     */
-    float matrix[9] = {
-        hor_scale, 0.0f,      hor_translate,
-        0.0f,      ver_scale, ver_translate,
-        0.0f,      0.0f,      1.0f
-    };
 
     /*
     static float tangle = 0.0f;
@@ -216,6 +202,10 @@ void lv_opengles_render_display_texture(unsigned int texture, const lv_area_t * 
                     -1.0f,  1.0f, clip_x1, clip_y1
                 };
                 lv_opengles_vertex_buffer_init(rotated_90_positions, sizeof(rotated_90_positions));
+#if LV_USE_DRAW_OPENGLES
+                h_flip = !h_flip;
+                v_flip = !v_flip;
+#endif
                 break;
             case LV_DISPLAY_ROTATION_180:
                 float rotated_180_positions[LV_OPENGLES_VERTEX_BUFFER_LEN] = {
@@ -234,6 +224,10 @@ void lv_opengles_render_display_texture(unsigned int texture, const lv_area_t * 
                     1.0f, -1.0f, clip_x1, clip_y1
                 };
                 lv_opengles_vertex_buffer_init(rotated_270_positions, sizeof(rotated_270_positions));
+#if LV_USE_DRAW_OPENGLES
+                h_flip = !h_flip;
+                v_flip = !v_flip;
+#endif
                 break;
             default: //LV_DISPLAY_ROTATION_0
                 float positions[LV_OPENGLES_VERTEX_BUFFER_LEN] = {
@@ -246,6 +240,21 @@ void lv_opengles_render_display_texture(unsigned int texture, const lv_area_t * 
                 break;
         }
     }
+
+    float hor_scale = 1.0f;
+    float ver_scale = 1.0f;
+    float hor_translate = 0.0f;
+    float ver_translate = 0.0f;
+    hor_scale = h_flip ? -hor_scale : hor_scale;
+    ver_scale = v_flip ? ver_scale : -ver_scale;
+    /*
+     *   Normal
+     */
+    float matrix[9] = {
+        hor_scale, 0.0f,      hor_translate,
+        0.0f,      ver_scale, ver_translate,
+        0.0f,      0.0f,      1.0f
+    };
 
     lv_opengles_shader_bind();
     lv_opengles_shader_set_uniform1f("u_ColorDepth", LV_COLOR_DEPTH);
@@ -273,7 +282,36 @@ void lv_opengles_render_clear(void)
     LV_PROFILER_DRAW_END;
 }
 
+
+// Static variables to store the previous viewport settings
+static int32_t saved_x = 0;
+static int32_t saved_y = 0;
+static int32_t saved_w = 0;
+static int32_t saved_h = 0;
+static bool viewport_saved = false; // Flag to check if viewport is saved
+
 void lv_opengles_viewport(int32_t x, int32_t y, int32_t w, int32_t h)
+{
+    // Save the current viewport settings
+    glGetIntegerv(GL_VIEWPORT, (GLint[]) {
+        saved_x, saved_y, saved_w, saved_h
+    });
+    viewport_saved = true; // Mark that the viewport has been saved
+
+    // Set the new viewport
+    GL_CALL(glViewport(x, y, w, h));
+}
+
+void lv_opengles_viewport_restore()
+{
+    if(viewport_saved) {
+        // Restore the saved viewport settings
+        GL_CALL(glViewport(saved_x, saved_y, saved_w, saved_h));
+    }
+}
+
+
+void lv_opengles_viewport_temp(int32_t x, int32_t y, int32_t w, int32_t h)
 {
     LV_PROFILER_DRAW_BEGIN;
     GL_CALL(glViewport(x, y, w, h));
