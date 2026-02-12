@@ -41,41 +41,53 @@ void lv_example_gltf_4(void)
     lv_gltf_model_t * logo_model = lv_gltf_data_load_from_file(
                                        "A:lvgl/examples/libs/gltf/lvgl_logo.glb", NULL);
 
+    const int COMMON_WIDTH = 50;
+    const int COMMON_HEIGHT = 25;
+    const int ODDBALL_WIDTH = 25;
+    
     /* Create first glTF viewer - Top Left */
     lv_obj_t * gltf1 = lv_gltf_create(lv_screen_active());
-    lv_obj_set_size(gltf1, LV_PCT(50), LV_PCT(50));
+    lv_obj_set_size(gltf1, LV_PCT(ODDBALL_WIDTH), LV_PCT(COMMON_HEIGHT));
     lv_obj_align(gltf1, LV_ALIGN_TOP_LEFT, 0, 0);
     lv_gltf_set_pitch(gltf1, -30.f);
     lv_gltf_set_yaw(gltf1, -30.f);
     lv_gltf_set_distance(gltf1, 0.5f);
     lv_gltf_add_model(gltf1, logo_model);
+    lv_obj_t * gltf1_text = lv_label_create(gltf1);
+    lv_label_set_text_static(gltf1_text, "TOP LEFT");
 
     /* Create second glTF viewer - Top Right */
     lv_obj_t * gltf2 = lv_gltf_create(lv_screen_active());
-    lv_obj_set_size(gltf2, LV_PCT(50), LV_PCT(50));
+    lv_obj_set_size(gltf2, LV_PCT(COMMON_WIDTH), LV_PCT(COMMON_HEIGHT));
     lv_obj_align(gltf2, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_gltf_set_pitch(gltf2, -30.f);
     lv_gltf_set_yaw(gltf2, 30.f);
     lv_gltf_set_distance(gltf2, 0.5f);
     lv_gltf_add_model(gltf2, logo_model);
+    lv_obj_t * gltf2_text = lv_label_create(gltf2);
+    lv_label_set_text_static(gltf2_text, "TOP RIGHT");
 
     /* Create third glTF viewer - Bottom Left */
     lv_obj_t * gltf3 = lv_gltf_create(lv_screen_active());
-    lv_obj_set_size(gltf3, LV_PCT(50), LV_PCT(50));
+    lv_obj_set_size(gltf3, LV_PCT(COMMON_WIDTH), LV_PCT(COMMON_HEIGHT));
     lv_obj_align(gltf3, LV_ALIGN_BOTTOM_LEFT, 0, 0);
     lv_gltf_set_pitch(gltf3, 30.f);
     lv_gltf_set_yaw(gltf3, -30.f);
     lv_gltf_set_distance(gltf3, 0.5f);
     lv_gltf_add_model(gltf3, logo_model);
+    lv_obj_t * gltf3_text = lv_label_create(gltf3);
+    lv_label_set_text_static(gltf3_text, "BOTTOM LEFT");
 
     /* Create fourth glTF viewer - Bottom Right */
     lv_obj_t * gltf4 = lv_gltf_create(lv_screen_active());
-    lv_obj_set_size(gltf4, LV_PCT(50), LV_PCT(50));
+    lv_obj_set_size(gltf4, LV_PCT(COMMON_WIDTH), LV_PCT(COMMON_HEIGHT));
     lv_obj_align(gltf4, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
     lv_gltf_set_pitch(gltf4, 30.f);
     lv_gltf_set_yaw(gltf4, 30.f);
     lv_gltf_set_distance(gltf4, 0.5f);
     lv_gltf_add_model(gltf4, logo_model);
+    lv_obj_t * gltf4_text = lv_label_create(gltf4);
+    lv_label_set_text_static(gltf4_text, "BOTTOM RIGHT");
 
     /* Get the root node of the shared logo */
     logo_root = lv_gltf_model_node_get_by_numeric_path(logo_model, ".0");

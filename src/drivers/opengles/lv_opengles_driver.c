@@ -292,6 +292,10 @@ void lv_opengles_reinit_state(void)
     LV_PROFILER_DRAW_END;
 }
 
+static void print_matrix(const lv_matrix_t * mat){
+    LV_LOG("%.2f, %.2f, %.2f\n%.2f, %.2f, %.2f\n%.2f, %.2f, %.2f\n", mat->m[0][0], mat->m[1][0], mat->m[2][0], mat->m[0][1], mat->m[1][1], mat->m[2][1], mat->m[0][2], mat->m[1][2], mat->m[2][2]);
+}
+
 void lv_opengles_render(const lv_opengles_render_params_t * params)
 {
     LV_ASSERT_NULL(params);
@@ -309,24 +313,26 @@ void lv_opengles_render(const lv_opengles_render_params_t * params)
     if(params->matrix) {
         is_turned = params->matrix->m[0][0] == 0.f;
     }
-    float tex_w, tex_h, full_w, full_h;
+    float tex_w, tex_h, full_w, full_h, inter_w, inter_h;
+    full_w = (float)params->disp_w;
+    full_h = (float)params->disp_h;
     if(is_turned) {
         tex_w = (float)lv_area_get_height(&intersection);
         tex_h = (float)lv_area_get_width(&intersection);
-        full_w = (float)params->disp_h;
-        full_h = (float)params->disp_w;
+        inter_w = (float)intersection.y1;
+        inter_h = (float)intersection.x1;
     }
     else {
         tex_w = (float)lv_area_get_width(&intersection);
         tex_h = (float)lv_area_get_height(&intersection);
-        full_w = (float)params->disp_w;
-        full_h = (float)params->disp_h;
+        inter_w = (float)intersection.x1;
+        inter_h = (float)intersection.y1;
     }
 
-    float hor_scale = tex_w / (float)params->disp_w;
-    float ver_scale = tex_h / (float)params->disp_h;
-    float hor_translate = (float)intersection.x1 / full_w * 2.0f - (1.0f - hor_scale);
-    float ver_translate = -((float)intersection.y1 / full_h * 2.0f - (1.0f - ver_scale));
+    float hor_scale = tex_w / full_w;
+    float ver_scale = tex_h / full_h;
+    float hor_translate = inter_w / full_w * 2.0f - (1.0f - hor_scale);
+    float ver_translate = -(inter_h / full_h * 2.0f - (1.0f - ver_scale));
     hor_scale = params->h_flip ? -hor_scale : hor_scale;
     ver_scale = params->v_flip ? ver_scale : -ver_scale;
 
@@ -355,6 +361,7 @@ void lv_opengles_render(const lv_opengles_render_params_t * params)
 
     lv_matrix_t matrix;
     lv_matrix_identity(&matrix);
+
     if (params->matrix) {
         if(is_turned) {
             /* Display turned 90 or 270 */
@@ -369,26 +376,22 @@ void lv_opengles_render(const lv_opengles_render_params_t * params)
             lv_memcpy(&adj_matrix, params->matrix, sizeof(lv_matrix_t));
             adj_matrix.m[0][2] = 0.f;
             adj_matrix.m[1][2] = 0.f;
-
             lv_matrix_multiply(&matrix, &adj_matrix);
+
         }
         else {
             /* Display turned 0 or 180 */
-            if(params->matrix->m[0][0] < 0.f) {
+            if(params->matrix->m[0][0] < -0.0001f) {
                 ver_scale = -ver_scale;
-            }
-            else {
                 ver_translate = -ver_translate;
             }
 
-            if(params->matrix->m[1][1] < 0.f) {
+            if(params->matrix->m[1][1] < -0.0001f) {
                 hor_scale = -hor_scale;
-            }
-            else {
                 hor_translate = -hor_translate;
             }
 
-            lv_matrix_translate(&matrix, ver_translate, hor_translate);
+            lv_matrix_translate(&matrix, hor_translate, ver_translate);
             lv_matrix_scale(&matrix, hor_scale, ver_scale);
         }
     }
